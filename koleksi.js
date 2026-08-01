@@ -259,6 +259,7 @@ function renderProducts() {
     elements.emptyState.classList.toggle("hidden", products.length !== 0);
 
     bindFavoriteButtons();
+    bindProductCards();
 }
 
 function bindFavoriteButtons() {
@@ -281,6 +282,149 @@ function bindFavoriteButtons() {
                 renderProducts();
             });
         });
+}
+
+let currentQuickLookProductId = null;
+
+function getQuickLookElements() {
+    return {
+        backdrop: document.getElementById("quickLookBackdrop"),
+        sheet: document.getElementById("quickLookSheet"),
+        categoryPill: document.getElementById("qlCategoryPill"),
+        closeBtn: document.getElementById("qlCloseBtn"),
+        image: document.getElementById("qlImage"),
+        favoriteBtn: document.getElementById("qlFavoriteBtn"),
+        favoriteIcon: document.getElementById("qlFavoriteIcon"),
+        title: document.getElementById("qlTitle"),
+        price: document.getElementById("qlPrice"),
+        description: document.getElementById("qlDescription"),
+        tags: document.getElementById("qlTags"),
+        detailLink: document.getElementById("qlDetailLink"),
+        dragHandle: document.getElementById("qlDragHandle")
+    };
+}
+
+function openQuickLook(product) {
+    const ql = getQuickLookElements();
+    if (!ql.sheet || !ql.backdrop) return;
+
+    currentQuickLookProductId = product.id;
+
+    const categoryObj = state.config.categories.find(c => c.id === product.category);
+    ql.categoryPill.textContent = categoryObj ? categoryObj.label : (product.category || "Koleksi");
+
+    ql.image.src = product.image.src;
+    ql.image.alt = product.image.alt || product.name;
+    ql.title.textContent = product.name;
+    ql.price.textContent = formatPrice(product.price);
+    ql.description.textContent = product.description || "Desain nail art eksklusif buatan tangan dengan material premium untuk momen istimewa Anda.";
+    ql.detailLink.href = product.href || "#";
+
+    const tagList = product.tags || ["Handmade", "Premium", "Reusable"];
+    ql.tags.innerHTML = tagList.map(tag => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join("");
+
+    updateQuickLookFavoriteBtn();
+
+    ql.backdrop.classList.add("is-active");
+    ql.backdrop.setAttribute("aria-hidden", "false");
+    ql.sheet.classList.add("is-active");
+    ql.sheet.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+}
+
+function updateQuickLookFavoriteBtn() {
+    const ql = getQuickLookElements();
+    if (!ql.favoriteBtn || !currentQuickLookProductId) return;
+
+    const isFav = state.favorites.has(currentQuickLookProductId);
+    ql.favoriteBtn.classList.toggle("text-primary", isFav);
+    ql.favoriteBtn.classList.toggle("text-[#6e5a60]", !isFav);
+    ql.favoriteIcon.style.fontVariationSettings = `'FILL' ${isFav ? 1 : 0}`;
+}
+
+function closeQuickLook() {
+    const ql = getQuickLookElements();
+    if (!ql.sheet || !ql.backdrop) return;
+
+    ql.backdrop.classList.remove("is-active");
+    ql.backdrop.setAttribute("aria-hidden", "true");
+    ql.sheet.classList.remove("is-active");
+    ql.sheet.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+
+    currentQuickLookProductId = null;
+}
+
+function bindQuickLookEvents() {
+    const ql = getQuickLookElements();
+    if (!ql.sheet) return;
+
+    ql.closeBtn.addEventListener("click", closeQuickLook);
+    ql.backdrop.addEventListener("click", closeQuickLook);
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && ql.sheet.classList.contains("is-active")) {
+            closeQuickLook();
+        }
+    });
+
+    ql.favoriteBtn.addEventListener("click", () => {
+        if (!currentQuickLookProductId) return;
+        if (state.favorites.has(currentQuickLookProductId)) {
+            state.favorites.delete(currentQuickLookProductId);
+        } else {
+            state.favorites.add(currentQuickLookProductId);
+        }
+        saveFavorites();
+        updateQuickLookFavoriteBtn();
+        renderProducts();
+    });
+
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+
+    ql.sheet.addEventListener("touchstart", (e) => {
+        if (ql.sheet.scrollTop <= 0) {
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        }
+    }, { passive: true });
+
+    ql.sheet.addEventListener("touchmove", (e) => {
+        if (!isDragging) return;
+        currentY = e.touches[0].clientY;
+        const diff = currentY - startY;
+        if (diff > 0) {
+            ql.sheet.style.transform = `translateX(-50%) translateY(${diff}px)`;
+        }
+    }, { passive: true });
+
+    ql.sheet.addEventListener("touchend", () => {
+        if (!isDragging) return;
+        isDragging = false;
+        const diff = currentY - startY;
+        if (diff > 80) {
+            closeQuickLook();
+        }
+        ql.sheet.style.transform = "";
+    });
+}
+
+function bindProductCards() {
+    elements.productGrid.querySelectorAll("article.product-card").forEach((card) => {
+        card.addEventListener("click", (event) => {
+            if (event.target.closest("[data-favorite-id]")) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            const productId = card.dataset.productId;
+            const product = state.config.products.find((p) => p.id === productId);
+            if (product) {
+                openQuickLook(product);
+            }
+        });
+    });
 }
 
 function renderNavigation() {
@@ -335,8 +479,10 @@ function renderNavigation() {
 }
 
 function bindStaticEvents() {
-    elements.searchInput.addEventListener("input", () => {
-        state.query = elements.searchInput.value;
+    bindQuickLookEvents();
+
+    elements.searchInput.addEventListener("input", (event) => {
+        state.query = event.target.value.trim().toLowerCase();
         elements.clearSearch.classList.toggle("hidden", state.query.length === 0);
         elements.clearSearch.classList.toggle("flex", state.query.length > 0);
         renderProducts();
@@ -367,6 +513,7 @@ function bindStaticEvents() {
         elements.productGrid.classList.toggle("hidden", favoriteProducts.length === 0);
         elements.emptyState.classList.toggle("hidden", favoriteProducts.length !== 0);
         bindFavoriteButtons();
+        bindProductCards();
     });
 }
 
