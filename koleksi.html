@@ -116,6 +116,40 @@
                 0 6px 18px rgba(242, 161, 178, 0.26);
         }
 
+        .skeleton-glass {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 20px rgba(242, 161, 178, 0.08);
+        }
+
+        @keyframes skeletonShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .skeleton-shimmer {
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.25) 0%,
+                rgba(255, 255, 255, 0.75) 50%,
+                rgba(255, 255, 255, 0.25) 100%
+            );
+            background-size: 200% 100%;
+            animation: skeletonShimmer 2s ease-in-out infinite;
+        }
+
+        .skeleton-container {
+            transition: opacity 280ms cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+        }
+
+        .skeleton-fade-out {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         .fade-in {
             animation: fadeIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
@@ -137,6 +171,13 @@
                 scroll-behavior: auto !important;
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .skeleton-shimmer {
+                animation: none !important;
+                background: rgba(255, 255, 255, 0.45) !important;
+            }
+            .skeleton-container {
                 transition-duration: 0.01ms !important;
             }
         }
@@ -173,6 +214,127 @@
 
     <div class="relative flex min-h-screen w-full flex-col items-center">
         <main class="w-full max-w-[600px] min-h-screen bg-white/40 backdrop-blur-sm border-x border-white/50 shadow-2xl px-6 pt-24 relative">
+            <!-- Skeleton Container (Non-interactive overlay with 8 product card skeletons) -->
+            <div id="skeletonContainer" class="skeleton-container absolute inset-0 pt-24 px-6 z-20 bg-background-light/95 backdrop-blur-md pointer-events-none" aria-hidden="true">
+                <section class="pt-4">
+                    <div class="h-3 w-28 rounded-full skeleton-glass skeleton-shimmer"></div>
+                    <div class="mt-3 flex items-center gap-2">
+                        <div class="h-9 w-32 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        <div class="h-9 w-24 rounded-full skeleton-glass skeleton-shimmer"></div>
+                    </div>
+                    <div class="mt-3 h-4 w-5/6 rounded-full skeleton-glass skeleton-shimmer"></div>
+
+                    <!-- Search Bar Skeleton -->
+                    <div class="glass-panel mt-6 h-14 rounded-full flex items-center px-4 overflow-hidden relative border border-white/80">
+                        <div class="w-5 h-5 rounded-full skeleton-glass skeleton-shimmer shrink-0"></div>
+                        <div class="h-4 w-36 rounded-full skeleton-glass skeleton-shimmer ml-3"></div>
+                    </div>
+                </section>
+
+                <!-- Category Filter Chips Skeleton -->
+                <section class="mt-7">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="h-5 w-24 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        <div class="h-3.5 w-16 rounded-full skeleton-glass skeleton-shimmer"></div>
+                    </div>
+                    <div class="-mx-6 px-6 overflow-x-auto no-scrollbar">
+                        <div class="flex gap-3 min-w-max pb-2">
+                            <div class="w-20 h-9 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="w-24 h-9 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="w-28 h-9 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="w-20 h-9 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="w-22 h-9 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Segmented Sort Control Skeleton -->
+                <section class="mt-4">
+                    <div class="grid grid-cols-4 rounded-full bg-white/35 border border-white/60 p-1 gap-1 h-10 overflow-hidden">
+                        <div class="h-full rounded-full skeleton-glass skeleton-shimmer"></div>
+                        <div class="h-full rounded-full skeleton-glass skeleton-shimmer"></div>
+                        <div class="h-full rounded-full skeleton-glass skeleton-shimmer"></div>
+                        <div class="h-full rounded-full skeleton-glass skeleton-shimmer"></div>
+                    </div>
+                </section>
+
+                <!-- Product Grid Skeleton (Exactly 8 Cards) -->
+                <section class="mt-7 grid grid-cols-2 gap-x-4 gap-y-8 pb-32">
+                    <div>
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem] skeleton-glass skeleton-shimmer shadow-glass border border-white/70">
+                            <div class="absolute right-3 top-3 w-9 h-9 rounded-full bg-white/50 backdrop-blur-sm"></div>
+                        </div>
+                        <div class="mt-3 text-center flex flex-col items-center gap-2">
+                            <div class="h-4 w-3/4 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="h-3.5 w-1/2 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem] skeleton-glass skeleton-shimmer shadow-glass border border-white/70">
+                            <div class="absolute right-3 top-3 w-9 h-9 rounded-full bg-white/50 backdrop-blur-sm"></div>
+                        </div>
+                        <div class="mt-3 text-center flex flex-col items-center gap-2">
+                            <div class="h-4 w-4/5 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="h-3.5 w-2/5 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem] skeleton-glass skeleton-shimmer shadow-glass border border-white/70">
+                            <div class="absolute right-3 top-3 w-9 h-9 rounded-full bg-white/50 backdrop-blur-sm"></div>
+                        </div>
+                        <div class="mt-3 text-center flex flex-col items-center gap-2">
+                            <div class="h-4 w-2/3 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="h-3.5 w-1/2 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem] skeleton-glass skeleton-shimmer shadow-glass border border-white/70">
+                            <div class="absolute right-3 top-3 w-9 h-9 rounded-full bg-white/50 backdrop-blur-sm"></div>
+                        </div>
+                        <div class="mt-3 text-center flex flex-col items-center gap-2">
+                            <div class="h-4 w-3/4 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="h-3.5 w-2/5 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem] skeleton-glass skeleton-shimmer shadow-glass border border-white/70">
+                            <div class="absolute right-3 top-3 w-9 h-9 rounded-full bg-white/50 backdrop-blur-sm"></div>
+                        </div>
+                        <div class="mt-3 text-center flex flex-col items-center gap-2">
+                            <div class="h-4 w-4/5 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="h-3.5 w-1/2 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem] skeleton-glass skeleton-shimmer shadow-glass border border-white/70">
+                            <div class="absolute right-3 top-3 w-9 h-9 rounded-full bg-white/50 backdrop-blur-sm"></div>
+                        </div>
+                        <div class="mt-3 text-center flex flex-col items-center gap-2">
+                            <div class="h-4 w-3/4 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="h-3.5 w-2/5 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem] skeleton-glass skeleton-shimmer shadow-glass border border-white/70">
+                            <div class="absolute right-3 top-3 w-9 h-9 rounded-full bg-white/50 backdrop-blur-sm"></div>
+                        </div>
+                        <div class="mt-3 text-center flex flex-col items-center gap-2">
+                            <div class="h-4 w-2/3 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="h-3.5 w-1/2 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem] skeleton-glass skeleton-shimmer shadow-glass border border-white/70">
+                            <div class="absolute right-3 top-3 w-9 h-9 rounded-full bg-white/50 backdrop-blur-sm"></div>
+                        </div>
+                        <div class="mt-3 text-center flex flex-col items-center gap-2">
+                            <div class="h-4 w-4/5 rounded-full skeleton-glass skeleton-shimmer"></div>
+                            <div class="h-3.5 w-2/5 rounded-full skeleton-glass skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
             <section class="pt-4 fade-in">
                 <p id="pageEyebrow" class="text-xs font-semibold uppercase tracking-[0.18em] text-primary-dark"></p>
 

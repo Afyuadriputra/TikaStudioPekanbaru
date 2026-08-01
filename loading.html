@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="theme-color" content="#fbf8f9"/>
+    <title>Lumière — Booting Application</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+
+    <style>
+        :root {
+            --primary: #f2a1b2;
+            --primary-dark: #d18a99;
+            --background: #fbf8f9;
+            --text-main: #1b0e11;
+            --text-sub: #7c686e;
+            --glass-surface: rgba(255, 255, 255, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --glass-shadow: 0 16px 48px 0 rgba(242, 161, 178, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--background);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Latar Belakang Liquid Blobs */
+        .background-blobs {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .liquid-blob {
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(80px);
+            opacity: 0.6;
+        }
+
+        .blob-1 {
+            width: 480px;
+            height: 480px;
+            background: rgba(242, 161, 178, 0.3);
+            top: -150px;
+            left: -150px;
+        }
+
+        .blob-2 {
+            width: 400px;
+            height: 400px;
+            background: rgba(227, 213, 216, 0.85);
+            bottom: -100px;
+            right: -120px;
+        }
+
+        .blob-3 {
+            width: 300px;
+            height: 300px;
+            background: rgba(242, 161, 178, 0.2);
+            top: 40%;
+            left: 30%;
+        }
+
+        /* Kontainer Utama Boot */
+        .boot-screen {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* App Boot Card */
+        .glass-boot-card {
+            background: var(--glass-surface);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        /* Header Brand */
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-icon {
+            color: var(--primary);
+            font-size: 26px;
+        }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+        }
+
+        /* Wrapper & Image GIF */
+        .gif-container {
+            width: 180px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1.75rem;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            overflow: hidden;
+            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.4);
+        }
+
+        .boot-gif {
+            width: 160px;
+            height: auto;
+            max-height: 130px;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Status Rotator Teks */
+        .status-container {
+            min-height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-sub);
+            letter-spacing: 0.01em;
+            transition: opacity 300ms ease, transform 300ms ease;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .status-text.switching {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+
+        /* Modal Dialog Error */
+        .error-modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(251, 248, 249, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 300ms ease;
+            z-index: 20;
+        }
+
+        .error-modal.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .error-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 9999px;
+            background: rgba(242, 161, 178, 0.15);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .error-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .error-message {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .retry-btn {
+            background: rgba(242, 161, 178, 0.9);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 16px rgba(242, 161, 178, 0.3);
+            cursor: pointer;
+            transition: all 200ms ease;
+        }
+
+        .retry-btn:hover {
+            background: rgba(242, 161, 178, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(242, 161, 178, 0.4);
+        }
+
+        .retry-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* Transition Overlay for Crossfade */
+        .fade-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: var(--background);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .fade-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Accessibility: Prefers Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            .liquid-blob {
+                animation: none !important;
+            }
+            .boot-screen, .fade-overlay, .status-text {
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Latar Belakang Liquid Blobs -->
+    <div class="background-blobs" aria-hidden="true">
+        <div class="liquid-blob blob-1"></div>
+        <div class="liquid-blob blob-2"></div>
+        <div class="liquid-blob blob-3"></div>
+    </div>
+
+    <!-- Tampilan Boot Utama -->
+    <main class="boot-screen" id="bootScreen">
+        <div class="glass-boot-card">
+            <!-- Brand -->
+            <div class="brand-header">
+                <span class="material-symbols-outlined brand-icon" aria-hidden="true">water_drop</span>
+                <h1 class="brand-name">Lumière</h1>
+            </div>
+
+            <!-- GIF Animasi -->
+            <div class="gif-container">
+                <img class="boot-gif"
+                     src="./assets/loading/duck-jump-rope.gif"
+                     alt="Lumière application loading animation"
+                     width="160"
+                     height="130"/>
+            </div>
+
+            <!-- Rotating Status Text -->
+            <div class="status-container">
+                <p id="statusText" class="status-text" aria-live="polite">
+                    Menyiapkan pengalaman Anda...
+                </p>
+            </div>
+
+            <!-- Glass Error Dialog (Hidden by Default) -->
+            <div id="errorModal" class="error-modal" aria-hidden="true">
+                <div class="error-icon">
+                    <span class="material-symbols-outlined">cloud_off</span>
+                </div>
+                <h2 class="error-title">Gagal Menyiapkan Aplikasi</h2>
+                <p class="error-message">
+                    Tidak dapat menyiapkan aplikasi. Silakan periksa koneksi Anda dan coba lagi.
+                </p>
+                <button type="button" id="retryBtn" class="retry-btn">
+                    Coba Lagi
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Overlay untuk Transisi Crossfade 400ms -->
+    <div id="fadeOverlay" class="fade-overlay" aria-hidden="true"></div>
+
+    <script>
+        "use strict";
+
+        // Global memory cache array to preserve image assets in RAM across navigation
+        window.__preloadedImages = [];
+
+        const CONFIG = {
+            targetUrl: "./index.html",
+            jsonUrl: "./koleksi.json",
+            gifDurationMs: 2500,       // Minimum duration to complete GIF animation cycle
+            maxTimeoutMs: 5000,        // Max wait timeout before proceeding
+            sessionKey: "lumiere-app-booted"
+        };
+
+        const STATUS_MESSAGES = [
+            "Menyiapkan pengalaman Anda...",
+            "Memuat koleksi premium...",
+            "Mengoptimalkan visual...",
+            "Menyiapkan ruang kerja...",
+            "Menyiapkan lingkungan aman...",
+            "Hampir siap..."
+        ];
+
+        const ASSET_MANIFEST = [
+            "./assets/loading/duck-jump-rope.gif",
+            "./assets/images/koleksi/burgundy-floral.png",
+            "./assets/images/koleksi/olive-gold-flower.png",
+            "./assets/images/koleksi/rose-gold-flower.png",
+            "./assets/images/koleksi/ruby-pink-luxury.png",
+            "./assets/images/koleksi/silver-leopard.png"
+        ];
+
+        const elements = {
+            bootScreen: document.getElementById("bootScreen"),
+            statusText: document.getElementById("statusText"),
+            errorModal: document.getElementById("errorModal"),
+            retryBtn: document.getElementById("retryBtn"),
+            fadeOverlay: document.getElementById("fadeOverlay")
+        };
+
+        let statusIndex = 0;
+        let statusInterval = null;
+
+        // Start rotating status messages with soft fade transitions
+        function startStatusRotation() {
+            statusInterval = setInterval(() => {
+                statusIndex = (statusIndex + 1) % STATUS_MESSAGES.length;
+                const nextMessage = STATUS_MESSAGES[statusIndex];
+
+                elements.statusText.classList.add("switching");
+                setTimeout(() => {
+                    elements.statusText.textContent = nextMessage;
+                    elements.statusText.classList.remove("switching");
+                }, 300);
+            }, 1800);
+        }
+
+        function stopStatusRotation() {
+            if (statusInterval) {
+                clearInterval(statusInterval);
+                statusInterval = null;
+            }
+        }
+
+        // Preload Image Asset into memory
+        function preloadImage(src) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    window.__preloadedImages.push(img);
+                    resolve({ src, success: true });
+                };
+                img.onerror = () => {
+                    resolve({ src, success: false });
+                };
+                img.src = src;
+            });
+        }
+
+        // Preload Google Fonts
+        async function preloadFonts() {
+            if (!document.fonts) return;
+            try {
+                await document.fonts.ready;
+            } catch (e) {
+                console.warn("Font preloading warning:", e);
+            }
+        }
+
+        // Fetch koleksi.json with 1-time auto retry
+        async function fetchCollectionJson(retryCount = 0) {
+            try {
+                const res = await fetch(CONFIG.jsonUrl, { cache: "force-cache" });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return await res.json();
+            } catch (err) {
+                if (retryCount < 1) {
+                    console.warn("Retrying koleksi.json fetch once...");
+                    await new Promise(r => setTimeout(r, 600));
+                    return fetchCollectionJson(retryCount + 1);
+                }
+                throw err;
+            }
+        }
+
+        // Preload index.html structure
+        async function preloadIndexPage() {
+            try {
+                await fetch(CONFIG.targetUrl, { cache: "force-cache" });
+            } catch (e) {
+                console.warn("Index HTML prefetch warning:", e);
+            }
+        }
+
+        // Execute background boot initialization tasks using Promise.all()
+        async function executeBootTasks() {
+            const fontPromise = preloadFonts();
+            const imagePromises = Promise.all(ASSET_MANIFEST.map(preloadImage));
+            const jsonPromise = fetchCollectionJson();
+            const indexPromise = preloadIndexPage();
+
+            await Promise.all([fontPromise, imagePromises, jsonPromise, indexPromise]);
+        }
+
+        // Smooth 400ms crossfade transition to index.html
+        function transitionToHomepage() {
+            stopStatusRotation();
+            elements.statusText.textContent = "Hampir siap...";
+
+            sessionStorage.setItem(CONFIG.sessionKey, "true");
+
+            elements.fadeOverlay.classList.add("active");
+
+            setTimeout(() => {
+                window.location.replace(CONFIG.targetUrl);
+            }, 400);
+        }
+
+        // Show glass error modal
+        function showErrorModal() {
+            stopStatusRotation();
+            elements.errorModal.classList.add("is-visible");
+            elements.errorModal.setAttribute("aria-hidden", "false");
+        }
+
+        function hideErrorModal() {
+            elements.errorModal.classList.remove("is-visible");
+            elements.errorModal.setAttribute("aria-hidden", "true");
+        }
+
+        // Main Boot Process Engine
+        async function startBootSequence() {
+            hideErrorModal();
+            const startTime = Date.now();
+            startStatusRotation();
+
+            const isReturningVisit = sessionStorage.getItem(CONFIG.sessionKey) === "true";
+
+            try {
+                // Execute boot tasks asynchronously
+                const bootTasksPromise = executeBootTasks();
+
+                // Enforce max timeout limit of 5 seconds
+                const timeoutPromise = new Promise(resolve => setTimeout(resolve, CONFIG.maxTimeoutMs));
+
+                await Promise.race([bootTasksPromise, timeoutPromise]);
+
+                // Ensure GIF animation minimum duration condition is satisfied
+                const elapsedTime = Date.now() - startTime;
+                const minGifTime = CONFIG.gifDurationMs;
+                const remainingDelay = Math.max(0, minGifTime - elapsedTime);
+
+                if (remainingDelay > 0) {
+                    await new Promise(resolve => setTimeout(resolve, remainingDelay));
+                }
+
+                transitionToHomepage();
+            } catch (error) {
+                console.error("Application Boot Initialization Failed:", error);
+                showErrorModal();
+            }
+        }
+
+        // Event listener for Retry button
+        elements.retryBtn.addEventListener("click", () => {
+            startBootSequence();
+        });
+
+        // Initialize on DOM load
+        document.addEventListener("DOMContentLoaded", startBootSequence);
+    </script>
+</body>
+</html>

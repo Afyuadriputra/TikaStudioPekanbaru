@@ -371,6 +371,9 @@ function bindStaticEvents() {
 }
 
 async function initializeCollection() {
+    const startTime = Date.now();
+    const skeletonContainer = document.getElementById("skeletonContainer");
+
     try {
         const response = await fetch("./koleksi.json", { cache: "no-store" });
 
@@ -386,8 +389,26 @@ async function initializeCollection() {
         renderProducts();
         renderNavigation();
         bindStaticEvents();
+
+        const elapsedTime = Date.now() - startTime;
+        const remainingDelay = Math.max(0, 500 - elapsedTime);
+
+        setTimeout(() => {
+            if (skeletonContainer) {
+                skeletonContainer.classList.add("skeleton-fade-out");
+
+                setTimeout(() => {
+                    skeletonContainer.style.display = "none";
+                    skeletonContainer.remove();
+                }, 280);
+            }
+        }, remainingDelay);
     } catch (error) {
         console.error("Gagal memuat koleksi.json:", error);
+        if (skeletonContainer) {
+            skeletonContainer.style.display = "none";
+            skeletonContainer.remove();
+        }
         elements.loadError.classList.remove("hidden");
         elements.productGrid.classList.add("hidden");
     }
