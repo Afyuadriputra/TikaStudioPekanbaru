@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="theme-color" content="#fbf8f9"/>
+    <title>Koleksi Lumière - Nail Art Premium</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#f2a1b2",
+                        "primary-dark": "#d18a99",
+                        "background-light": "#fbf8f9",
+                        "background-dark": "#211115"
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        serif: ["Playfair Display", "serif"]
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                        lg: "1.5rem",
+                        xl: "2.5rem",
+                        "2xl": "3rem",
+                        full: "9999px"
+                    },
+                    boxShadow: {
+                        glass: "0 8px 32px 0 rgba(242, 161, 178, 0.15)",
+                        "glass-hover": "0 8px 32px 0 rgba(242, 161, 178, 0.25)"
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { -webkit-tap-highlight-color: transparent; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .glass-pill-nav {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        .liquid-blob {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed !important;
+            left: 50% !important;
+            bottom: 0 !important;
+            transform: translateX(-50%) !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding-bottom: max(1.5rem, env(safe-area-inset-bottom)) !important;
+            z-index: 9999 !important;
+        }
+
+        .mobile-top-bar {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 600px;
+            z-index: 9998;
+        }
+
+        .product-image {
+            transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .product-card:hover .product-image { transform: scale(1.045); }
+
+        .segment-indicator {
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .category-chip { transition: all 0.25s ease; }
+
+        .category-chip.is-active {
+            color: #ffffff;
+            background: rgba(242, 161, 178, 0.92);
+            border-color: rgba(255, 255, 255, 0.55);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.45),
+                0 6px 18px rgba(242, 161, 178, 0.26);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .mobile-bottom-nav {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-[#1b0e11] font-display antialiased selection:bg-primary selection:text-white">
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="liquid-blob w-[500px] h-[500px] bg-primary/20 rounded-full top-[-100px] left-[-100px]"></div>
+        <div class="liquid-blob w-[400px] h-[400px] bg-[#e3d5d8] rounded-full bottom-[10%] right-[-100px]"></div>
+        <div class="liquid-blob w-[300px] h-[300px] bg-primary/15 rounded-full top-[40%] left-[20%]"></div>
+    </div>
+
+    <header class="mobile-top-bar px-4 pt-4">
+        <div class="glass-panel rounded-full h-14 px-3 flex items-center justify-between shadow-glass">
+            <a id="backLink"
+               href="index.html"
+               class="w-10 h-10 rounded-full flex items-center justify-center text-[#5e4a4f] hover:bg-white/50 active:scale-95 transition-all">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[22px]">water_drop</span>
+                <h1 id="headerTitle" class="font-serif text-xl font-bold tracking-tight"></h1>
+            </div>
+
+            <button id="headerFavorite"
+                    type="button"
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-[#5e4a4f] hover:bg-white/50 active:scale-95 transition-all">
+                <span class="material-symbols-outlined">favorite</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="relative flex min-h-screen w-full flex-col items-center">
+        <main class="w-full max-w-[600px] min-h-screen bg-white/40 backdrop-blur-sm border-x border-white/50 shadow-2xl px-6 pt-24 relative">
+            <section class="pt-4 fade-in">
+                <p id="pageEyebrow" class="text-xs font-semibold uppercase tracking-[0.18em] text-primary-dark"></p>
+
+                <div class="mt-2">
+                    <h2 class="font-serif text-[38px] leading-[1.05] font-medium text-[#1b0e11]">
+                        <span id="pageTitle"></span>
+                        <span id="pageTitleAccent" class="italic text-primary-dark"></span>
+                    </h2>
+                    <p id="pageDescription" class="mt-3 text-sm leading-relaxed text-[#5e4a4f]"></p>
+                </div>
+
+                <label class="glass-panel mt-6 h-14 rounded-full flex items-center px-4 focus-within:ring-2 focus-within:ring-primary/25 transition-shadow">
+                    <span class="material-symbols-outlined text-[#8a7a80]">search</span>
+                    <input id="searchInput"
+                           type="search"
+                           autocomplete="off"
+                           class="w-full h-full border-0 bg-transparent px-3 text-sm text-[#1b0e11] placeholder:text-[#9b8b90] focus:ring-0"/>
+                    <button id="clearSearch"
+                            type="button"
+                            class="hidden w-8 h-8 rounded-full items-center justify-center text-[#8a7a80] hover:bg-white/60">
+                        <span class="material-symbols-outlined text-[19px]">close</span>
+                    </button>
+                </label>
+            </section>
+
+            <section class="mt-7 fade-in" style="animation-delay: 80ms;">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 id="categoryTitle" class="font-serif text-xl font-medium"></h3>
+                    <span id="productCount" class="text-xs font-medium text-[#8a7a80]"></span>
+                </div>
+
+                <div class="-mx-6 px-6 overflow-x-auto no-scrollbar">
+                    <div id="categoryChips" class="flex gap-3 min-w-max pb-2"></div>
+                </div>
+            </section>
+
+            <section class="mt-4 fade-in" style="animation-delay: 140ms;">
+                <div id="sortControl"
+                     class="relative grid rounded-full bg-white/35 border border-white/60 p-1 overflow-hidden">
+                    <span id="segmentIndicator"
+                          class="segment-indicator absolute left-1 top-1 bottom-1 rounded-full bg-white/85 shadow-sm"></span>
+                </div>
+            </section>
+
+            <section id="productGrid"
+                     class="mt-7 grid grid-cols-2 gap-x-4 gap-y-8 fade-in"
+                     style="animation-delay: 200ms;"></section>
+
+            <section id="emptyState" class="hidden py-20 text-center">
+                <div class="mx-auto w-16 h-16 rounded-full glass-panel flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-3xl">search_off</span>
+                </div>
+                <h3 id="emptyTitle" class="mt-4 font-serif text-2xl font-medium"></h3>
+                <p id="emptyDescription" class="mt-2 text-sm text-[#7c686e]"></p>
+            </section>
+
+            <section id="loadError" class="hidden py-20 text-center">
+                <div class="mx-auto w-16 h-16 rounded-full glass-panel flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-3xl">error</span>
+                </div>
+                <h3 class="mt-4 font-serif text-2xl font-medium">Data gagal dimuat</h3>
+                <p class="mt-2 text-sm text-[#7c686e]">Jalankan halaman melalui local server dan pastikan koleksi.json berada di folder yang sama.</p>
+            </section>
+
+            <div aria-hidden="true" style="height: calc(8rem + env(safe-area-inset-bottom));"></div>
+        </main>
+    </div>
+
+    <nav id="bottomNavigation"
+         class="mobile-bottom-nav w-full max-w-[600px] z-50 pointer-events-none flex justify-center px-4"
+         aria-label="Navigasi utama"></nav>
+
+    <script src="koleksi.js" defer></script>
+</body>
+</html>

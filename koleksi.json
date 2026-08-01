@@ -1,0 +1,391 @@
+{
+  "__BAGIAN_01__": "========== PENGATURAN UMUM WEBSITE ==========",
+
+  "meta": {
+    "title": "Koleksi Lumière - Nail Art Premium",
+    "language": "id",
+    "currency": "IDR",
+    "currencyLocale": "id-ID"
+  },
+
+  "__BAGIAN_02__": "========== TEKS HALAMAN KOLEKSI ==========",
+
+  "page": {
+    "headerTitle": "Koleksi",
+    "backLabel": "Kembali ke beranda",
+    "favoriteLabel": "Lihat produk favorit",
+    "eyebrow": "Temukan gaya Anda",
+    "title": "Koleksi",
+    "titleAccent": "Pilihan",
+    "description": "Jelajahi desain nail art buatan tangan untuk setiap gaya dan momen istimewa.",
+    "searchPlaceholder": "Cari koleksi...",
+    "clearSearchLabel": "Hapus pencarian",
+    "categoryTitle": "Kategori",
+    "productSuffix": "produk",
+    "emptyTitle": "Koleksi tidak ditemukan",
+    "emptyDescription": "Coba gunakan kata kunci atau kategori lain."
+  },
+
+  "__BAGIAN_03__": "========== DAFTAR KATEGORI ==========",
+
+  "categories": [
+    {
+      "id": "semua",
+      "label": "Semua"
+    },
+    {
+      "id": "french",
+      "label": "French"
+    },
+    {
+      "id": "pernikahan",
+      "label": "Pernikahan"
+    },
+    {
+      "id": "mewah",
+      "label": "Mewah"
+    },
+    {
+      "id": "minimalis",
+      "label": "Minimalis"
+    },
+    {
+      "id": "korea",
+      "label": "Korea"
+    }
+  ],
+
+  "__BAGIAN_04__": "========== PILIHAN PENGURUTAN ==========",
+
+  "sortOptions": [
+    {
+      "id": "terbaru",
+      "label": "Terbaru"
+    },
+    {
+      "id": "populer",
+      "label": "Populer"
+    },
+    {
+      "id": "tren",
+      "label": "Tren"
+    },
+    {
+      "id": "rekomendasi",
+      "label": "Untuk Anda"
+    }
+  ],
+
+  "__BAGIAN_05__": "========== DATA PRODUK KOLEKSI ==========",
+
+  "products": [
+    {
+      "_pemisah": "========== PRODUK 01: GARIS PERAK ==========",
+
+      "id": "garis-perak",
+      "slug": "garis-perak",
+      "name": "Garis Perak",
+      "price": 450000,
+
+      "categories": [
+        "french",
+        "minimalis"
+      ],
+
+      "tags": [
+        "merah muda",
+        "perak",
+        "french tip",
+        "minimalis"
+      ],
+
+      "sortScores": {
+        "terbaru": 8,
+        "populer": 6,
+        "tren": 7,
+        "rekomendasi": 8
+      },
+
+      "image": {
+        "src": "https://www.beautyhaul.com/assets/uploads/Nail_art_1.jpg",
+        "alt": "Nail art merah muda lembut dengan ujung french berwarna perak"
+      },
+
+      "href": "#",
+      "favorite": false
+    },
+
+    {
+      "_pemisah": "========== PRODUK 02: ESENSI MUTIARA ==========",
+
+      "id": "esensi-mutiara",
+      "slug": "esensi-mutiara",
+      "name": "Esensi Mutiara",
+      "price": 120000,
+
+      "categories": [
+        "pernikahan",
+        "mewah",
+        "minimalis"
+      ],
+
+      "tags": [
+        "putih susu",
+        "mutiara",
+        "pengantin",
+        "elegan"
+      ],
+
+      "sortScores": {
+        "terbaru": 7,
+        "populer": 8,
+        "tren": 6,
+        "rekomendasi": 7
+      },
+
+      "image": {
+        "src": "https://images.soco.id/731-4.jpg.jpeg",
+        "alt": "Nail art putih susu dengan hiasan mutiara kecil"
+      },
+
+      "href": "#",
+      "favorite": false
+    },
+
+    {
+      "_pemisah": "========== PRODUK BARU 09: BURGUNDY FLORAL ==========",
+
+      "id": "burgundy-floral",
+      "slug": "burgundy-floral",
+      "name": "Burgundy Floral",
+      "price": 120000,
+
+      "categories": [
+        "mewah",
+        "minimalis"
+      ],
+
+      "tags": [
+        "burgundy",
+        "merah marun",
+        "bunga",
+        "floral",
+        "mutiara",
+        "elegan"
+      ],
+
+      "sortScores": {
+        "terbaru": 13,
+        "populer": 8,
+        "tren": 9,
+        "rekomendasi": 8
+      },
+
+      "image": {
+        "src": "./assets/images/koleksi/burgundy-floral.png",
+        "alt": "Nail art burgundy dan merah muda dengan motif bunga serta hiasan mutiara"
+      },
+
+      "href": "#",
+      "favorite": false
+    },
+
+    {
+      "_pemisah": "========== PRODUK BARU 10: OLIVE GOLD FLOWER ==========",
+
+      "id": "olive-gold-flower",
+      "slug": "olive-gold-flower",
+      "name": "Olive Gold Flower",
+      "price": 150000,
+
+      "categories": [
+        "mewah",
+        "korea"
+      ],
+
+      "tags": [
+        "hijau olive",
+        "emas",
+        "chrome",
+        "bunga putih",
+        "floral",
+        "korea"
+      ],
+
+      "sortScores": {
+        "terbaru": 12,
+        "populer": 9,
+        "tren": 10,
+        "rekomendasi": 9
+      },
+
+      "image": {
+        "src": "./assets/images/koleksi/olive-gold-flower.png",
+        "alt": "Nail art hijau olive dengan ujung chrome emas dan ornamen bunga putih"
+      },
+
+      "href": "#",
+      "favorite": false
+    },
+
+    {
+      "_pemisah": "========== PRODUK BARU 11: SILVER LEOPARD ==========",
+
+      "id": "silver-leopard",
+      "slug": "silver-leopard",
+      "name": "Silver Leopard",
+      "price": 130000,
+
+      "categories": [
+        "mewah"
+      ],
+
+      "tags": [
+        "perak",
+        "silver",
+        "chrome",
+        "leopard",
+        "animal print",
+        "emas"
+      ],
+
+      "sortScores": {
+        "terbaru": 11,
+        "populer": 7,
+        "tren": 10,
+        "rekomendasi": 7
+      },
+
+      "image": {
+        "src": "./assets/images/koleksi/silver-leopard.png",
+        "alt": "Nail art chrome perak dengan aksen ujung emas dan motif leopard"
+      },
+
+      "href": "#",
+      "favorite": false
+    },
+
+    {
+      "_pemisah": "========== PRODUK BARU 12: RUBY PINK LUXURY ==========",
+
+      "id": "ruby-pink-luxury",
+      "slug": "ruby-pink-luxury",
+      "name": "Ruby Pink Luxury",
+      "price": 135000,
+
+      "categories": [
+        "mewah",
+        "pernikahan"
+      ],
+
+      "tags": [
+        "merah ruby",
+        "merah muda",
+        "pink",
+        "emas",
+        "floral",
+        "pesta"
+      ],
+
+      "sortScores": {
+        "terbaru": 10,
+        "populer": 10,
+        "tren": 9,
+        "rekomendasi": 10
+      },
+
+      "image": {
+        "src": "./assets/images/koleksi/ruby-pink-luxury.png",
+        "alt": "Nail art merah ruby dan merah muda dengan detail emas serta ornamen bunga"
+      },
+
+      "href": "#",
+      "favorite": false
+    },
+
+    {
+      "_pemisah": "========== PRODUK BARU 13: ROSE GOLD FLOWER ==========",
+
+      "id": "rose-gold-flower",
+      "slug": "rose-gold-flower",
+      "name": "Rose Gold Flower",
+      "price": 140000,
+
+      "categories": [
+        "mewah",
+        "minimalis"
+      ],
+
+      "tags": [
+        "rose gold",
+        "cokelat",
+        "chrome",
+        "bunga perak",
+        "mutiara",
+        "elegan"
+      ],
+
+      "sortScores": {
+        "terbaru": 9,
+        "populer": 8,
+        "tren": 8,
+        "rekomendasi": 9
+      },
+
+      "image": {
+        "src": "./assets/images/koleksi/rose-gold-flower.png",
+        "alt": "Nail art rose gold dan cokelat dengan ornamen bunga perak serta hiasan kristal"
+      },
+
+      "href": "#",
+      "favorite": false
+    }
+  ],
+
+  "__BAGIAN_06__": "========== BOTTOM NAVIGATION ==========",
+
+  "navigation": [
+    {
+      "_pemisah": "========== MENU BERANDA ==========",
+      "id": "beranda",
+      "label": "Beranda",
+      "icon": "home",
+      "href": "index.html",
+      "active": false
+    },
+    {
+      "_pemisah": "========== MENU KOLEKSI ==========",
+      "id": "koleksi",
+      "label": "Koleksi",
+      "icon": "grid_view",
+      "href": "koleksi.html",
+      "active": true
+    },
+    {
+      "_pemisah": "========== TOMBOL TAMBAH ==========",
+      "id": "tambah",
+      "label": "Tambah desain",
+      "icon": "add",
+      "href": "#",
+      "type": "primaryAction",
+      "active": false
+    },
+    {
+      "_pemisah": "========== MENU KERANJANG ==========",
+      "id": "keranjang",
+      "label": "Keranjang",
+      "icon": "shopping_bag",
+      "href": "#",
+      "badge": true,
+      "active": false
+    },
+    {
+      "_pemisah": "========== MENU PROFIL ==========",
+      "id": "profil",
+      "label": "Profil",
+      "icon": "person",
+      "href": "#",
+      "active": false
+    }
+  ]
+}
