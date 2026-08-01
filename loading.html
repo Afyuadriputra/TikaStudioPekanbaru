@@ -4,8 +4,12 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="theme-color" content="#fbf8f9"/>
-    <title>Lumière — Booting Application</title>
+    <title>TikaStudio — Booting Application</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin/>
+    <link rel="preconnect" href="https://lh3.googleusercontent.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
 
@@ -237,7 +241,7 @@
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 4px 16px rgba(242, 161, 178, 0.3);
             cursor: pointer;
-            transition: all 200ms ease;
+            transition: background-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
         }
 
         .retry-btn:hover {
@@ -291,14 +295,14 @@
             <!-- Brand -->
             <div class="brand-header">
                 <span class="material-symbols-outlined brand-icon" aria-hidden="true">water_drop</span>
-                <h1 class="brand-name">Lumière</h1>
+                <h1 class="brand-name">TikaStudio</h1>
             </div>
 
             <!-- GIF Animasi -->
             <div class="gif-container">
                 <img class="boot-gif"
                      src="./assets/loading/duck-jump-rope.gif"
-                     alt="Lumière application loading animation"
+                     alt="TikaStudio application loading animation"
                      width="160"
                      height="130"/>
             </div>
@@ -311,12 +315,12 @@
             </div>
 
             <!-- Glass Error Dialog (Hidden by Default) -->
-            <div id="errorModal" class="error-modal" aria-hidden="true">
-                <div class="error-icon">
+            <div id="errorModal" class="error-modal" role="alertdialog" aria-modal="true" aria-labelledby="errorTitle" aria-describedby="errorMessage" aria-hidden="true">
+                <div class="error-icon" aria-hidden="true">
                     <span class="material-symbols-outlined">cloud_off</span>
                 </div>
-                <h2 class="error-title">Gagal Menyiapkan Aplikasi</h2>
-                <p class="error-message">
+                <h2 id="errorTitle" class="error-title">Gagal Menyiapkan Aplikasi</h2>
+                <p id="errorMessage" class="error-message">
                     Tidak dapat menyiapkan aplikasi. Silakan periksa koneksi Anda dan coba lagi.
                 </p>
                 <button type="button" id="retryBtn" class="retry-btn">
@@ -332,15 +336,14 @@
     <script>
         "use strict";
 
-        // Global memory cache array to preserve image assets in RAM across navigation
-        window.__preloadedImages = [];
-
         const CONFIG = {
             targetUrl: "./index.html",
             jsonUrl: "./koleksi.json",
             gifDurationMs: 2500,       // Minimum duration to complete GIF animation cycle
-            maxTimeoutMs: 5000,        // Max wait timeout before proceeding
-            sessionKey: "lumiere-app-booted"
+            maxTimeoutMs: 5000,        // Max time allowed for critical boot work
+            sessionKey: "lumiere-app-booted",
+            collectionCacheKey: "lumiere-collection-cache-v1",
+            tailwindUrl: "https://cdn.tailwindcss.com?plugins=forms,container-queries"
         };
 
         const STATUS_MESSAGES = [
@@ -350,15 +353,6 @@
             "Menyiapkan ruang kerja...",
             "Menyiapkan lingkungan aman...",
             "Hampir siap..."
-        ];
-
-        const ASSET_MANIFEST = [
-            "./assets/loading/duck-jump-rope.gif",
-            "./assets/images/koleksi/burgundy-floral.png",
-            "./assets/images/koleksi/olive-gold-flower.png",
-            "./assets/images/koleksi/rose-gold-flower.png",
-            "./assets/images/koleksi/ruby-pink-luxury.png",
-            "./assets/images/koleksi/silver-leopard.png"
         ];
 
         const elements = {
@@ -393,21 +387,6 @@
             }
         }
 
-        // Preload Image Asset into memory
-        function preloadImage(src) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                    window.__preloadedImages.push(img);
-                    resolve({ src, success: true });
-                };
-                img.onerror = () => {
-                    resolve({ src, success: false });
-                };
-                img.src = src;
-            });
-        }
-
         // Preload Google Fonts
         async function preloadFonts() {
             if (!document.fonts) return;
@@ -418,39 +397,144 @@
             }
         }
 
-        // Fetch koleksi.json with 1-time auto retry
-        async function fetchCollectionJson(retryCount = 0) {
+        function canUseStorage(storage) {
+            const key = "__lumiere_boot_probe__";
             try {
-                const res = await fetch(CONFIG.jsonUrl, { cache: "force-cache" });
+                storage.setItem(key, "1");
+                storage.removeItem(key);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        function waitForGifCycle(signal) {
+            return new Promise((resolve, reject) => {
+                const gif = document.querySelector(".boot-gif");
+                const timeoutId = setTimeout(resolve, CONFIG.gifDurationMs);
+                const abort = () => {
+                    clearTimeout(timeoutId);
+                    reject(new DOMException("Boot cancelled", "AbortError"));
+                };
+
+                signal.addEventListener("abort", abort, { once: true });
+                if (gif.complete) return;
+                gif.addEventListener("error", () => {
+                    clearTimeout(timeoutId);
+                    reject(new Error("GIF loading failed"));
+                }, { once: true });
+            });
+        }
+
+        // Fetch koleksi.json with one bounded retry and retain only its small configuration payload.
+        async function fetchCollectionJson(signal, retryCount = 0) {
+            try {
+                const res = await fetch(CONFIG.jsonUrl, { cache: "force-cache", signal });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return await res.json();
+                const data = await res.json();
+                if (!data?.meta || !Array.isArray(data.products)) {
+                    throw new Error("Invalid collection configuration");
+                }
+                return data;
             } catch (err) {
-                if (retryCount < 1) {
+                if (err.name !== "AbortError" && retryCount < 1) {
                     console.warn("Retrying koleksi.json fetch once...");
                     await new Promise(r => setTimeout(r, 600));
-                    return fetchCollectionJson(retryCount + 1);
+                    return fetchCollectionJson(signal, retryCount + 1);
                 }
                 throw err;
             }
         }
 
-        // Preload index.html structure
-        async function preloadIndexPage() {
-            try {
-                await fetch(CONFIG.targetUrl, { cache: "force-cache" });
-            } catch (e) {
-                console.warn("Index HTML prefetch warning:", e);
-            }
+        async function preloadImage(src, signal) {
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                const abort = () => {
+                    image.src = "";
+                    reject(new DOMException("Boot cancelled", "AbortError"));
+                };
+                image.onload = () => resolve();
+                image.onerror = () => reject(new Error(`Critical image failed: ${src}`));
+                signal.addEventListener("abort", abort, { once: true });
+                image.src = src;
+            });
+        }
+
+        function preloadScript(src, signal) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                const abort = () => {
+                    script.remove();
+                    reject(new DOMException("Boot cancelled", "AbortError"));
+                };
+
+                script.async = true;
+                script.src = src;
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error(`Critical script failed: ${src}`));
+                signal.addEventListener("abort", abort, { once: true });
+                document.head.append(script);
+            });
+        }
+
+        function getFirstHeroUrl(homepageHtml) {
+            const match = homepageHtml.match(/background-image:\s*url\('([^']+)'\)/i);
+            return match?.[1] || null;
+        }
+
+        // Fetch the homepage document, then warm only its critical runtime and hero image.
+        async function preloadIndexPage(signal) {
+            const response = await fetch(CONFIG.targetUrl, { cache: "force-cache", signal });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const html = await response.text();
+            const heroUrl = getFirstHeroUrl(html);
+            const criticalTasks = [
+                preloadScript(CONFIG.tailwindUrl, signal)
+            ];
+
+            if (heroUrl) criticalTasks.push(preloadImage(heroUrl, signal));
+            await Promise.all(criticalTasks);
         }
 
         // Execute background boot initialization tasks using Promise.all()
-        async function executeBootTasks() {
+        async function executeBootTasks(signal) {
             const fontPromise = preloadFonts();
-            const imagePromises = Promise.all(ASSET_MANIFEST.map(preloadImage));
-            const jsonPromise = fetchCollectionJson();
-            const indexPromise = preloadIndexPage();
+            const jsonPromise = fetchCollectionJson(signal);
+            const indexPromise = preloadIndexPage(signal);
 
-            await Promise.all([fontPromise, imagePromises, jsonPromise, indexPromise]);
+            const [, collection] = await Promise.all([fontPromise, jsonPromise, indexPromise]);
+            if (canUseStorage(sessionStorage)) {
+                try {
+                    sessionStorage.setItem(CONFIG.collectionCacheKey, JSON.stringify(collection));
+                } catch {
+                    // The network cache remains available when session storage is full.
+                }
+            }
+        }
+
+        function scheduleIdlePreparation() {
+            const prepare = () => {
+                // Hint the browser about secondary assets without retaining images in memory.
+                [
+                    "./assets/images/koleksi/burgundy-floral.webp",
+                    "./assets/images/koleksi/olive-gold-flower.webp",
+                    "./assets/images/koleksi/rose-gold-flower.webp",
+                    "./assets/images/koleksi/ruby-pink-luxury.webp",
+                    "./assets/images/koleksi/silver-leopard.webp"
+                ].forEach((href) => {
+                    const link = document.createElement("link");
+                    link.rel = "prefetch";
+                    link.as = "image";
+                    link.href = href;
+                    document.head.append(link);
+                });
+            };
+
+            if ("requestIdleCallback" in window) {
+                window.requestIdleCallback(prepare, { timeout: 300 });
+            } else {
+                setTimeout(prepare, 0);
+            }
         }
 
         // Smooth 400ms crossfade transition to index.html
@@ -458,12 +542,23 @@
             stopStatusRotation();
             elements.statusText.textContent = "Hampir siap...";
 
-            sessionStorage.setItem(CONFIG.sessionKey, "true");
+            let persistedBootState = false;
+            try {
+                sessionStorage.setItem(CONFIG.sessionKey, "true");
+                persistedBootState = true;
+            } catch {
+                // Navigation remains functional when storage is unavailable.
+            }
+
+            scheduleIdlePreparation();
 
             elements.fadeOverlay.classList.add("active");
 
             setTimeout(() => {
-                window.location.replace(CONFIG.targetUrl);
+                const target = persistedBootState
+                    ? CONFIG.targetUrl
+                    : `${CONFIG.targetUrl}?booted=1`;
+                window.location.replace(target);
             }, 400);
         }
 
@@ -472,6 +567,7 @@
             stopStatusRotation();
             elements.errorModal.classList.add("is-visible");
             elements.errorModal.setAttribute("aria-hidden", "false");
+            elements.retryBtn.focus();
         }
 
         function hideErrorModal() {
@@ -485,16 +581,21 @@
             const startTime = Date.now();
             startStatusRotation();
 
-            const isReturningVisit = sessionStorage.getItem(CONFIG.sessionKey) === "true";
-
             try {
-                // Execute boot tasks asynchronously
-                const bootTasksPromise = executeBootTasks();
+                if (navigator.onLine === false) {
+                    throw new Error("offline");
+                }
 
-                // Enforce max timeout limit of 5 seconds
-                const timeoutPromise = new Promise(resolve => setTimeout(resolve, CONFIG.maxTimeoutMs));
-
-                await Promise.race([bootTasksPromise, timeoutPromise]);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), CONFIG.maxTimeoutMs);
+                try {
+                    await Promise.all([
+                        executeBootTasks(controller.signal),
+                        waitForGifCycle(controller.signal)
+                    ]);
+                } finally {
+                    clearTimeout(timeoutId);
+                }
 
                 // Ensure GIF animation minimum duration condition is satisfied
                 const elapsedTime = Date.now() - startTime;

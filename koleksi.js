@@ -28,6 +28,7 @@ const elements = {
     emptyTitle: document.getElementById("emptyTitle"),
     emptyDescription: document.getElementById("emptyDescription"),
     loadError: document.getElementById("loadError"),
+    retryLoad: document.getElementById("retryLoad"),
     bottomNavigation: document.getElementById("bottomNavigation")
 };
 
@@ -63,11 +64,25 @@ function loadFavorites() {
     }
 }
 
+function readBootCollectionCache() {
+    try {
+        const cached = sessionStorage.getItem("lumiere-collection-cache-v1");
+        const config = cached ? JSON.parse(cached) : null;
+        return config?.meta && Array.isArray(config.products) ? config : null;
+    } catch {
+        return null;
+    }
+}
+
 function saveFavorites() {
-    localStorage.setItem(
-        "lumiere-favorites",
-        JSON.stringify([...state.favorites])
-    );
+    try {
+        localStorage.setItem(
+            "lumiere-favorites",
+            JSON.stringify([...state.favorites])
+        );
+    } catch (error) {
+        console.warn("Favorit tidak dapat disimpan di perangkat ini:", error);
+    }
 }
 
 function renderPageContent() {
@@ -109,15 +124,6 @@ function renderCategories() {
         })
         .join("");
 
-    elements.categoryChips
-        .querySelectorAll("[data-category]")
-        .forEach((button) => {
-            button.addEventListener("click", () => {
-                state.activeCategory = button.dataset.category;
-                renderCategories();
-                renderProducts();
-            });
-        });
 }
 
 function renderSortOptions() {
@@ -148,15 +154,6 @@ function renderSortOptions() {
     elements.sortControl.insertAdjacentHTML("beforeend", buttons);
     moveSortIndicator();
 
-    elements.sortControl
-        .querySelectorAll("[data-sort]")
-        .forEach((button) => {
-            button.addEventListener("click", () => {
-                state.activeSort = button.dataset.sort;
-                renderSortOptionsFresh();
-                renderProducts();
-            });
-        });
 }
 
 function renderSortOptionsFresh() {
@@ -213,8 +210,10 @@ function createProductCard(product) {
     const safeName = escapeHtml(product.name);
 
     return `
-        <article class="product-card group" data-product-id="${escapeHtml(product.id)}">
-            <a href="${escapeHtml(product.href || "#")}" class="block">
+        <article class="product-card group relative" data-product-id="${escapeHtml(product.id)}">
+            <button type="button" data-open-id="${escapeHtml(product.id)}"
+                    aria-label="Lihat preview ${safeName}"
+                    class="block w-full text-left text-inherit">
                 <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem]
                             bg-white/60 shadow-glass border border-white/70">
                     <img
@@ -222,29 +221,30 @@ function createProductCard(product) {
                         src="${escapeHtml(product.image.src)}"
                         alt="${escapeHtml(product.image.alt)}"
                         loading="lazy"
+                        decoding="async"
+                        width="${Number(product.image.width) || 960}"
+                        height="${Number(product.image.height) || 1280}"
                     />
-
-                    <button
-                        type="button"
-                        data-favorite-id="${escapeHtml(product.id)}"
-                        aria-label="${isFavorite ? "Hapus" : "Tambahkan"} ${safeName} ${isFavorite ? "dari" : "ke"} favorit"
-                        class="favorite-button absolute right-3 top-3 w-9 h-9 rounded-full
-                               glass-panel flex items-center justify-center
-                               ${isFavorite ? "text-primary" : "text-[#6e5a60]"}
-                               hover:text-primary active:scale-90 transition-all">
-                        <span
-                            class="material-symbols-outlined text-[20px]"
-                            style="font-variation-settings: 'FILL' ${isFavorite ? 1 : 0};">
-                            favorite
-                        </span>
-                    </button>
                 </div>
 
                 <div class="mt-3 text-center">
                     <h3 class="font-serif text-lg font-medium">${safeName}</h3>
                     <p class="mt-1 text-sm text-[#7c686e]">${formatPrice(product.price)}</p>
                 </div>
-            </a>
+            </button>
+            <button
+                type="button"
+                data-favorite-id="${escapeHtml(product.id)}"
+                aria-label="${isFavorite ? "Hapus" : "Tambahkan"} ${safeName} ${isFavorite ? "dari" : "ke"} favorit"
+                class="favorite-button absolute right-3 top-3 w-9 h-9 rounded-full
+                       glass-panel flex items-center justify-center
+                       ${isFavorite ? "text-primary" : "text-[#6e5a60]"}
+                       hover:text-primary active:scale-90 transition-transform transition-colors">
+                <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+                      style="font-variation-settings: 'FILL' ${isFavorite ? 1 : 0};">
+                    favorite
+                </span>
+            </button>
         </article>
     `;
 }
@@ -258,33 +258,11 @@ function renderProducts() {
     elements.productGrid.classList.toggle("hidden", products.length === 0);
     elements.emptyState.classList.toggle("hidden", products.length !== 0);
 
-    bindFavoriteButtons();
-    bindProductCards();
-}
-
-function bindFavoriteButtons() {
-    elements.productGrid
-        .querySelectorAll("[data-favorite-id]")
-        .forEach((button) => {
-            button.addEventListener("click", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-
-                const productId = button.dataset.favoriteId;
-
-                if (state.favorites.has(productId)) {
-                    state.favorites.delete(productId);
-                } else {
-                    state.favorites.add(productId);
-                }
-
-                saveFavorites();
-                renderProducts();
-            });
-        });
 }
 
 let currentQuickLookProductId = null;
+let lastFocusedElement = null;
+let previousBodyOverflow = "";
 
 function getQuickLookElements() {
     return {
@@ -310,8 +288,9 @@ function openQuickLook(product) {
 
     currentQuickLookProductId = product.id;
 
-    const categoryObj = state.config.categories.find(c => c.id === product.category);
-    ql.categoryPill.textContent = categoryObj ? categoryObj.label : (product.category || "Koleksi");
+    const primaryCategory = product.categories?.[0];
+    const categoryObj = state.config.categories.find((category) => category.id === primaryCategory);
+    ql.categoryPill.textContent = categoryObj ? categoryObj.label : "Koleksi";
 
     ql.image.src = product.image.src;
     ql.image.alt = product.image.alt || product.name;
@@ -329,7 +308,13 @@ function openQuickLook(product) {
     ql.backdrop.setAttribute("aria-hidden", "false");
     ql.sheet.classList.add("is-active");
     ql.sheet.setAttribute("aria-hidden", "false");
+    lastFocusedElement = document.activeElement;
+    previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    [document.querySelector("header"), document.getElementById("appMain"), elements.bottomNavigation]
+        .filter(Boolean)
+        .forEach((element) => { element.inert = true; });
+    requestAnimationFrame(() => ql.closeBtn.focus());
 }
 
 function updateQuickLookFavoriteBtn() {
@@ -339,6 +324,7 @@ function updateQuickLookFavoriteBtn() {
     const isFav = state.favorites.has(currentQuickLookProductId);
     ql.favoriteBtn.classList.toggle("text-primary", isFav);
     ql.favoriteBtn.classList.toggle("text-[#6e5a60]", !isFav);
+    ql.favoriteBtn.setAttribute("aria-label", `${isFav ? "Hapus" : "Tambahkan"} favorit`);
     ql.favoriteIcon.style.fontVariationSettings = `'FILL' ${isFav ? 1 : 0}`;
 }
 
@@ -350,9 +336,16 @@ function closeQuickLook() {
     ql.backdrop.setAttribute("aria-hidden", "true");
     ql.sheet.classList.remove("is-active");
     ql.sheet.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+    document.body.style.overflow = previousBodyOverflow;
+    [document.querySelector("header"), document.getElementById("appMain"), elements.bottomNavigation]
+        .filter(Boolean)
+        .forEach((element) => { element.inert = false; });
 
     currentQuickLookProductId = null;
+    if (lastFocusedElement instanceof HTMLElement) {
+        lastFocusedElement.focus();
+    }
+    lastFocusedElement = null;
 }
 
 function bindQuickLookEvents() {
@@ -365,6 +358,18 @@ function bindQuickLookEvents() {
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && ql.sheet.classList.contains("is-active")) {
             closeQuickLook();
+        }
+        if (e.key === "Tab" && ql.sheet.classList.contains("is-active")) {
+            const focusable = [...ql.sheet.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+            const first = focusable[0];
+            const last = focusable.at(-1);
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
         }
     });
 
@@ -383,6 +388,8 @@ function bindQuickLookEvents() {
     let startY = 0;
     let currentY = 0;
     let isDragging = false;
+    let dragFrame = null;
+    let pendingOffset = 0;
 
     ql.sheet.addEventListener("touchstart", (e) => {
         if (ql.sheet.scrollTop <= 0) {
@@ -396,7 +403,13 @@ function bindQuickLookEvents() {
         currentY = e.touches[0].clientY;
         const diff = currentY - startY;
         if (diff > 0) {
-            ql.sheet.style.transform = `translateX(-50%) translateY(${diff}px)`;
+            pendingOffset = diff;
+            if (!dragFrame) {
+                dragFrame = requestAnimationFrame(() => {
+                    ql.sheet.style.transform = `translateX(-50%) translateY(${pendingOffset}px)`;
+                    dragFrame = null;
+                });
+            }
         }
     }, { passive: true });
 
@@ -404,26 +417,14 @@ function bindQuickLookEvents() {
         if (!isDragging) return;
         isDragging = false;
         const diff = currentY - startY;
+        if (dragFrame) {
+            cancelAnimationFrame(dragFrame);
+            dragFrame = null;
+        }
         if (diff > 80) {
             closeQuickLook();
         }
         ql.sheet.style.transform = "";
-    });
-}
-
-function bindProductCards() {
-    elements.productGrid.querySelectorAll("article.product-card").forEach((card) => {
-        card.addEventListener("click", (event) => {
-            if (event.target.closest("[data-favorite-id]")) return;
-
-            event.preventDefault();
-            event.stopPropagation();
-            const productId = card.dataset.productId;
-            const product = state.config.products.find((p) => p.id === productId);
-            if (product) {
-                openQuickLook(product);
-            }
-        });
     });
 }
 
@@ -481,11 +482,45 @@ function renderNavigation() {
 function bindStaticEvents() {
     bindQuickLookEvents();
 
+    elements.categoryChips.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-category]");
+        if (!button) return;
+        state.activeCategory = button.dataset.category;
+        renderCategories();
+        renderProducts();
+    });
+
+    elements.sortControl.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-sort]");
+        if (!button) return;
+        state.activeSort = button.dataset.sort;
+        renderSortOptionsFresh();
+        renderProducts();
+    });
+
+    elements.productGrid.addEventListener("click", (event) => {
+        const favoriteButton = event.target.closest("[data-favorite-id]");
+        if (favoriteButton) {
+            const productId = favoriteButton.dataset.favoriteId;
+            state.favorites.has(productId) ? state.favorites.delete(productId) : state.favorites.add(productId);
+            saveFavorites();
+            renderProducts();
+            return;
+        }
+
+        const openButton = event.target.closest("[data-open-id]");
+        if (!openButton) return;
+        const product = state.config.products.find((item) => item.id === openButton.dataset.openId);
+        if (product) openQuickLook(product);
+    });
+
+    let searchTimeout;
     elements.searchInput.addEventListener("input", (event) => {
         state.query = event.target.value.trim().toLowerCase();
         elements.clearSearch.classList.toggle("hidden", state.query.length === 0);
         elements.clearSearch.classList.toggle("flex", state.query.length > 0);
-        renderProducts();
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(renderProducts, 150);
     });
 
     elements.clearSearch.addEventListener("click", () => {
@@ -512,9 +547,8 @@ function bindStaticEvents() {
             `${favoriteProducts.length} ${state.config.page.productSuffix}`;
         elements.productGrid.classList.toggle("hidden", favoriteProducts.length === 0);
         elements.emptyState.classList.toggle("hidden", favoriteProducts.length !== 0);
-        bindFavoriteButtons();
-        bindProductCards();
     });
+
 }
 
 async function initializeCollection() {
@@ -522,13 +556,18 @@ async function initializeCollection() {
     const skeletonContainer = document.getElementById("skeletonContainer");
 
     try {
-        const response = await fetch("./koleksi.json", { cache: "no-store" });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+        if (navigator.onLine === false) {
+            throw new Error("offline");
         }
-
-        state.config = await response.json();
+        elements.loadError.classList.add("hidden");
+        state.config = readBootCollectionCache();
+        if (!state.config) {
+            const response = await fetch("./koleksi.json", { cache: "force-cache" });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            state.config = await response.json();
+        }
         loadFavorites();
         renderPageContent();
         renderCategories();
@@ -561,4 +600,5 @@ async function initializeCollection() {
     }
 }
 
+elements.retryLoad.addEventListener("click", initializeCollection);
 document.addEventListener("DOMContentLoaded", initializeCollection);

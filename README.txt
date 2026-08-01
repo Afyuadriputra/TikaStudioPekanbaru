@@ -1,4 +1,4 @@
-STRUKTUR FILE LUMIÈRE
+STRUKTUR FILE TikaStudio
 
 koleksi.html
 - Hanya berisi struktur dan tampilan halaman.

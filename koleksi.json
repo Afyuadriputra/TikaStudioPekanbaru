@@ -2,7 +2,7 @@
   "__BAGIAN_01__": "========== PENGATURAN UMUM WEBSITE ==========",
 
   "meta": {
-    "title": "Koleksi Lumière - Nail Art Premium",
+    "title": "Koleksi TikaStudio - Nail Art Premium",
     "language": "id",
     "currency": "IDR",
     "currencyLocale": "id-ID"
@@ -182,7 +182,7 @@
       },
 
       "image": {
-        "src": "./assets/images/koleksi/burgundy-floral.png",
+        "src": "./assets/images/koleksi/burgundy-floral.webp",
         "alt": "Nail art burgundy dan merah muda dengan motif bunga serta hiasan mutiara"
       },
 
@@ -220,7 +220,7 @@
       },
 
       "image": {
-        "src": "./assets/images/koleksi/olive-gold-flower.png",
+        "src": "./assets/images/koleksi/olive-gold-flower.webp",
         "alt": "Nail art hijau olive dengan ujung chrome emas dan ornamen bunga putih"
       },
 
@@ -257,7 +257,7 @@
       },
 
       "image": {
-        "src": "./assets/images/koleksi/silver-leopard.png",
+        "src": "./assets/images/koleksi/silver-leopard.webp",
         "alt": "Nail art chrome perak dengan aksen ujung emas dan motif leopard"
       },
 
@@ -295,7 +295,7 @@
       },
 
       "image": {
-        "src": "./assets/images/koleksi/ruby-pink-luxury.png",
+        "src": "./assets/images/koleksi/ruby-pink-luxury.webp",
         "alt": "Nail art merah ruby dan merah muda dengan detail emas serta ornamen bunga"
       },
 
@@ -333,7 +333,7 @@
       },
 
       "image": {
-        "src": "./assets/images/koleksi/rose-gold-flower.png",
+        "src": "./assets/images/koleksi/rose-gold-flower.webp",
         "alt": "Nail art rose gold dan cokelat dengan ornamen bunga perak serta hiasan kristal"
       },
 
